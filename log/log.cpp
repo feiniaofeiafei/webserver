@@ -5,6 +5,15 @@
 #include <pthread.h>
 #include "log.h"
 using namespace std;
+Log::Log() {
+    m_count = 0;
+    m_is_async = false;
+}
+Log::~Log() {
+    if(m_fp!=nullptr){
+        fclose(m_fp);
+    }
+}
 bool Log::init(const char *file_name, int close_log, int log_buf_size, int split_lines, int max_queue_size) {
     if (max_queue_size>0) {
         m_async = true;
