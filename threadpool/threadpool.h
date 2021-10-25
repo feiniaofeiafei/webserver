@@ -87,7 +87,26 @@ void* thread_pool<T>::worker(void* arg){
 template<typename T>
 void thread_pool<T>::run(){
     while(true){
+        if(m_workqueue.empty()){
+            continue;
+        }
+        T* request = m_workqueue.front();
+        m_workqueue.pop_front();
+        if(!request){
+            continue;
+        }
+        if(1 == m_actor_model){
+            // if(0 == request -> m_state)}{
+            //     if(request -> read_once()){
 
+            //     }else{
+
+            //     }
+            // }
+        }else{
+            connectionRAII mysqlcon(&request -> mysql, m_conn_pool);
+            request -> process();
+        }
     }
 }
 
