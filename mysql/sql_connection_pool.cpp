@@ -1,5 +1,3 @@
-#ifndef _SQL_CONNECTION_POOL_H_
-#define _SQL_CONNECTION_POOL_H_
 #include "sql_connection_pool.h"
 
 
@@ -106,6 +104,3 @@ connectionRAII::connectionRAII(MYSQL** conn, mysql_connection_pool* conn_pool){
 connectionRAII::~connectionRAII(){
     this -> poolRAII -> release_mysql_conn(this -> connRAII);
 }
-
-
-# endif
