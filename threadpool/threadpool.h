@@ -104,8 +104,8 @@ void thread_pool<T>::run(){
             //     }
             // }
         }else{
-            connectionRAII mysqlcon(&request -> mysql, m_conn_pool);
-            request -> process();
+            // connectionRAII mysqlcon(&request -> sql, m_conn_pool);
+            // request -> process();
         }
     }
 }

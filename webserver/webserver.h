@@ -12,10 +12,10 @@ public:
     webserver();
     ~webserver();
 
-    void init();
-    void sql_pool();
+    void server_init();
+    void sql_pool_init();
     
-    void thread_pool();
+    void thread_pool_init();
 
     
 private:
