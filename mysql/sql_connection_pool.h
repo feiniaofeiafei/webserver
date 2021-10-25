@@ -13,6 +13,7 @@ public:
 
     MYSQL * get_mysql_conn();
     bool release_mysql_conn(MYSQL*);
+    mysql_connection_pool* get_instance();
     
     mysql_connection_pool();
     ~mysql_connection_pool();
@@ -29,4 +30,17 @@ private:
     int curConn;
     int freeConn;
     list<MYSQL* > connList;     // 连接池
+};
+
+
+
+class connectionRAII{
+
+public:
+    connectionRAII(MYSQL** conn, mysql_connection_pool* conn_pool);
+    ~connectionRAII();
+
+private:
+    MYSQL* connRAII;
+    mysql_connection_pool* poolRAII;
 };

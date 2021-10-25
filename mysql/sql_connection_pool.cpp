@@ -2,6 +2,12 @@
 #define _SQL_CONNECTION_POOL_H_
 #include "sql_connection_pool.h"
 
+
+mysql_connection_pool* mysql_connection_pool::get_instance(){
+    static mysql_connection_pool conn_pool;
+    return &conn_pool;
+}
+
 // 构造函数
 mysql_connection_pool::mysql_connection_pool(){
     this -> curConn = 0;
@@ -88,5 +94,18 @@ bool mysql_connection_pool::release_mysql_conn(MYSQL* sqlCon){
 
     return true;
 }
+
+
+connectionRAII::connectionRAII(MYSQL** conn, mysql_connection_pool* conn_pool){
+    *conn = conn_pool -> get_mysql_conn();
+
+    this -> connRAII = *conn;
+    this -> poolRAII = conn_pool;
+}
+
+connectionRAII::~connectionRAII(){
+    this -> poolRAII -> release_mysql_conn(this -> connRAII);
+}
+
 
 # endif
