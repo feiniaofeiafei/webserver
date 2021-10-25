@@ -57,7 +57,7 @@ private:
 class cond{
 public:
     cond(){
-        if(pthreak_cond_init(&m_cond,NULL) != 0){
+        if(pthread_cond_init(&m_cond,NULL) != 0){
             throw std::exception();
         }
     }
@@ -71,7 +71,7 @@ public:
     }
     bool timewait(pthread_mutex_t *mutex,struct timespec t){
         int ret=0;
-        ret = pthread_cond_wait(&m_cond, mutex, &t);
+        ret = pthread_cond_timedwait(&m_cond, mutex, &t);
         return ret==0;
     }
     bool signal(){

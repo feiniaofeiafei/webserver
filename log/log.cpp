@@ -7,7 +7,7 @@
 using namespace std;
 Log::Log() {
     m_count = 0;
-    m_is_async = false;
+    m_async = false;
 }
 Log::~Log() {
     if(m_fp!=nullptr){
@@ -18,7 +18,7 @@ bool Log::init(const char *file_name, int close_log, int log_buf_size, int split
     if (max_queue_size>0) {
         m_async = true;
         m_log_queue = new block_queue<string>(max_queue_size);
-        thread_t tid;
+        pthread_t tid;
         pthread_create(&tid,NULL,flush_log_thread,NULL);
     }
 
@@ -38,12 +38,12 @@ bool Log::init(const char *file_name, int close_log, int log_buf_size, int split
     if (p == NULL) {
         snprintf(log_full_name, 255, "%d_%02d_%02d_%s", my_tm.tm_year+1900, my_tm.tm_mon + 1, my_tm.tm_mday, file_name);
     } else {
-        strcpy(log_name, p + 1);
-        strncpy(dir_name, file_name, p - file_name + 1);
-        snprintf(log_full_name, 255, "%s%d_%02d_%02d_%s", dir_name, my_tm.tm_year + 1900, my_tm.tm_mon + 1, my_tm.tm_mday, log_name);
+        strcpy(m_log_name, p + 1);
+        strncpy(m_dir_name, file_name, p - file_name + 1);
+        snprintf(log_full_name, 255, "%s%d_%02d_%02d_%s", m_dir_name, my_tm.tm_year + 1900, my_tm.tm_mon + 1, my_tm.tm_mday, m_log_name);
     }
     
-    m_today = my_tm.tm_day;
+    m_today = my_tm.tm_mday;
     m_fp = fopen(log_full_name,"a");
     if(m_fp==nullptr) {
         return false;
@@ -92,11 +92,12 @@ void Log::write_log(int level, const char* format, ...) {
     int m = vsnprintf(m_buf+n, m_log_buf_size-1, format, valst);
     m_buf[n+m] = '\n';
     m_buf[n+m+1] = '\0';
+    string log_str; 
     log_str = m_buf;
     m_mutex.unlock();
     
-    if (m_is_async && !m_block_queue->full()) {
-        m_block_queue->push(log_record);    
+    if (m_async && !m_log_queue->full()) {
+        m_log_queue->push(log_record);    
     }else{
         m_mutex.lock();
         fputs(log_record.c_str(),m_fp);
