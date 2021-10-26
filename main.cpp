@@ -17,6 +17,9 @@ int main(int argc, char *argv[]){
 
     Log::get_instance()->init("./ServerLog", 0, 2000, 800000, 600);
     LOG_INFO("hello, this is log_info test%d",1);
+    LOG_DEBUG("hello, this is log_debug test%d",2);
+    LOG_WARN("hello, this is log_warn test%d",3);
+    LOG_ERROR("hello, this is log_error test%d",4);
     sleep(2);
     
     return 0;
