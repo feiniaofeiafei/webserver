@@ -16,7 +16,7 @@ public:
 
     MYSQL * get_mysql_conn();
     bool release_mysql_conn(MYSQL*);
-    mysql_connection_pool* get_instance();
+    static mysql_connection_pool* get_instance();
     
     mysql_connection_pool();
     ~mysql_connection_pool();

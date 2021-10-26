@@ -18,11 +18,11 @@ void http_conn::init_mysql_result(mysql_connection_pool* conn_pool){
     int num_fields = mysql_num_fields(result);
 
     // 返回所有字段结构的数组
-    MSYQL_FIELD* fields = mysql_fetch_fields(result);
+    MYSQL_FIELD* fields = mysql_fetch_fields(result);
 
     while(MYSQL_ROW row = mysql_fetch_row(result)){
-        string temp1[row[0]];
-        string temp2[row[1]];
+        string temp1(row[0]);
+        string temp2(row[1]);
         user_info[temp1] = temp2;
     }
 
