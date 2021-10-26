@@ -13,7 +13,8 @@
 using namespace std;
 
 template <class T>
-class block_queue{
+class block_queue
+{
 public:
     block_queue(int max_size =1000){
         if(max_size<0){
@@ -37,7 +38,7 @@ public:
 
     ~block_queue(){
         m_mutex.lock();
-        if(m_array!=NULL) {
+        if(m_array != NULL) {
             delete [] m_array;
         }
         m_mutex.unlock();
@@ -118,7 +119,7 @@ public:
 
     bool pop(T &item){
         m_mutex.lock();
-        while(0 == m_size){
+        while(m_size<=0){
             if(!m_cond.wait(m_mutex.get())){
                 m_mutex.unlock();
                 return false;
@@ -132,18 +133,23 @@ public:
     }
 
     bool pop(T &item, int ms_timeout){
-        struct timespec t = {0,0};
-        struct timeval now = {0,0};
-        gettimeofday(&now,NULL);
+        struct timespec t = {0, 0};
+        struct timeval now = {0, 0};
+        gettimeofday(&now, NULL);
         m_mutex.lock();
         if(m_size<=0)
         {
-            t.tv_sec = now.tv_sec + ms_timeout/1000;
-            t.tv_nsec = (ms_timeout%1000)*1000;
-            if(!m_cond.wait(m_mutex.get(),t){
+            t.tv_sec = now.tv_sec + ms_timeout / 1000;
+            t.tv_nsec = (ms_timeout % 1000) * 1000;
+            if(!m_cond.timewait(m_mutex.get(),t)){
                 m_mutex.unlock();
                 return false;
             }
+        }
+        if (m_size <= 0)
+        {
+            m_mutex.unlock();
+            return false;
         }
         m_front = (m_front + 1)%m_max_size;
         item = m_array[m_front];
@@ -154,13 +160,14 @@ public:
 
 private:
     locker m_mutex;
-    con m_cond;
+    cond m_cond;
 
     T *m_array;
     int m_size;
     int m_max_size;
     int m_front;
     int m_back;
+
 };
 
 #endif

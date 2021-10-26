@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include "log.h"
 using namespace std;
+
 Log::Log() {
     m_count = 0;
     m_async = false;
@@ -80,20 +81,48 @@ void Log::write_log(int level, const char* format, ...) {
             break;        
         }
     }
+    m_mutex.lock();
+    m_count++;
+
+    if (m_today != my_tm.tm_mday || m_count % m_split_lines == 0) //everyday log
+    {
+        
+        char new_log[256] = {0};
+        fflush(m_fp);
+        fclose(m_fp);
+        char tail[16] = {0};
+       
+        snprintf(tail, 16, "%d_%02d_%02d_", my_tm.tm_year + 1900, my_tm.tm_mon + 1, my_tm.tm_mday);
+       
+        if (m_today != my_tm.tm_mday)
+        {
+            snprintf(new_log, 255, "%s%s%s", m_dir_name, tail, m_log_name);
+            m_today = my_tm.tm_mday;
+            m_count = 0;
+        }
+        else
+        {
+            snprintf(new_log, 255, "%s%s%s.%lld", m_dir_name, tail, m_log_name, m_count / m_split_lines);
+        }
+        m_fp = fopen(new_log, "a");
+    }
+ 
+    m_mutex.unlock();
+
+
     va_list valst;
     va_start(valst,format);
     
     string log_record;
     m_mutex.lock();
     //向log_record中写入数据
-    int n = snprintf(m_buf, 48, "%d-%02d-%02d %02d:%02d:%02d.%061d %s ",
+    int n = snprintf(m_buf, 48, "%d-%02d-%02d %02d:%02d:%02d.%06ld %s ",
                     my_tm.tm_year+1900, my_tm.tm_mon+1, my_tm.tm_mday,
                     my_tm.tm_hour, my_tm.tm_min, my_tm.tm_sec, now.tv_usec, s);
     int m = vsnprintf(m_buf+n, m_log_buf_size-1, format, valst);
     m_buf[n+m] = '\n';
     m_buf[n+m+1] = '\0';
-    string log_str; 
-    log_str = m_buf;
+    log_record = m_buf;
     m_mutex.unlock();
     
     if (m_async && !m_log_queue->full()) {
