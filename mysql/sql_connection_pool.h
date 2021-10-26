@@ -1,3 +1,6 @@
+#ifndef _SQL_CONNECTION_POOL_H_
+#define _SQL_CONNECTION_POOL_H_
+
 #include <string>
 #include <mysql.h>
 #include <list>
@@ -13,7 +16,7 @@ public:
 
     MYSQL * get_mysql_conn();
     bool release_mysql_conn(MYSQL*);
-    mysql_connection_pool* get_instance();
+    static mysql_connection_pool* get_instance();
     
     mysql_connection_pool();
     ~mysql_connection_pool();
@@ -44,3 +47,5 @@ private:
     MYSQL* connRAII;
     mysql_connection_pool* poolRAII;
 };
+
+#endif
