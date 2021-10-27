@@ -1,7 +1,12 @@
 #ifndef _THREADPOOL_H_
 #define _THREADPOOL_H_
+
+#include <list>
+#include <cstdio>
+#include <exception>
+#include <pthread.h>
 #include "./../mysql/sql_connection_pool.h"
-using namespace std;
+#include "../lock/lock.h"
 
 template <typename T>
 class thread_pool{
@@ -23,7 +28,8 @@ private:
     std::list<T*> m_workqueue;              // 请求队列，存放的是一个个请求
     mysql_connection_pool* m_conn_pool;     // 数据库链接
     int m_actor_model;                      // 事件处理模型 Reactor/Proactor
-                                            // TODO 锁机制
+    sem m_queuestat;                        // 是否有任务需要处理
+    locker m_queuelocker;                   // 保护请求队列的互斥锁
 };
 
 // 往线程池中创建thread_number个线程，默认为8
@@ -55,25 +61,28 @@ thread_pool<T>::~thread_pool(){
 
 template<typename T>
 bool thread_pool<T>::append(T* request, int state){
-    // 加锁
+    m_queuelocker.lock();
     if(this -> m_workqueue.size() >= m_max_request){
-        // 解锁
+        m_queuelocker.unlock();
         return false;
     }
     request -> m_state = state;
     m_workqueue.push_back(request);
+    m_queuelocker.unlock();
+    m_queuestat.post();
     return true;
 }
 
 template<typename T>
 bool thread_pool<T>::append_p(T* request){
-    // 加锁
+    m_queuelocker.lock();
     if(this -> m_workqueue.size() >= m_max_request){
-        // 解锁
+        m_queuelocker.unlock();
         return false;
     }
     m_workqueue.push_back(request);
-    // 正常解锁
+    m_queuelocker.unlock();
+    m_queuestat.post();
     return true;
 }
 
@@ -87,21 +96,29 @@ void* thread_pool<T>::worker(void* arg){
 template<typename T>
 void thread_pool<T>::run(){
     while(true){
+        m_queuestat.wait();
+        m_queuelocker.lock();
         if(m_workqueue.empty()){
+            m_queuelocker.unlock();
             continue;
         }
         T* request = m_workqueue.front();
         m_workqueue.pop_front();
+        m_queuelocker.unlock();
         if(!request){
             continue;
         }
         if(1 == m_actor_model){
+            // // 读
             // if(0 == request -> m_state)}{
             //     if(request -> read_once()){
 
             //     }else{
 
             //     }
+            // }// 写
+            // else{
+
             // }
         }else{
             // connectionRAII mysqlcon(&request -> sql, m_conn_pool);
