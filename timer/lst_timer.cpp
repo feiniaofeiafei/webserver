@@ -1,5 +1,5 @@
 #include "lst_timer.h"
-#include "../http/http_coon.h"
+#include "../http/http_conn.h"
 
 sort_timer_list::sort_timer_list(){
     head = NULL;
@@ -117,8 +117,8 @@ void sort_timer_list::add_timer(util_timer *timer, util_timer *lst_head)
        tmp = tmp->next;
     }
     if(!tmp){
-        pre->next = timer;
-        timer->prev = next;
+        prev->next = timer;
+        timer->prev = prev;
         timer->next = NULL;
         tail = timer;
     }
@@ -131,17 +131,17 @@ void Utils::init(int timeslot){
 int Utils::setnonblocking(int fd){
     int old_option = fcntl(fd, F_GETFL);
     int new_option = old_option | O_NONBLOCK;
-    fcntl(fd, new_option);
+    fcntl(fd, F_SETFL, new_option);
     return old_option;
 }
 
-void Util::addfd(int epollfd, int fd, bool one_shot, int TRIGMode) {
+void Utils::addfd(int epollfd, int fd, bool one_shot, int TRIGMode) {
     epoll_event event;
     event.data.fd = fd;
     if(1==TRIGMode)
-        event.events = EPOOLIN|EPOLLET|EPOOLRDHUP;
+        event.events = EPOLLIN|EPOLLET|EPOLLRDHUP;
     else
-        event.events =  EPOOLIN|EPOOLRDHUP;
+        event.events =  EPOLLIN|EPOLLRDHUP;
     if(one_shot)
         event.events |= EPOLLONESHOT;
     epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
@@ -156,7 +156,7 @@ void Utils::sig_handler(int sig)
     errno = save_errno;
 }
 //这里为什么写成void(handler)(int)，而不是void(*handler)(int)呢？
-void Utile::addsig(int sig, void(*handler)(int), bool restart){
+void Utils::addsig(int sig, void(*handler)(int), bool restart){
     struct sigaction sa;
     memset(&sa, '\0', sizeof(sa));
     sa.sa_handler = handler;

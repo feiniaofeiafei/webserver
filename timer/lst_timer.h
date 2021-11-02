@@ -39,6 +39,7 @@ public:
     util_timer() : prev(NULL), next(NULL) {}
     time_t expire;
     void (*cb_func)(client_data *);
+    client_data *user_data;
     util_timer *prev;
     util_timer *next;
 };
@@ -54,7 +55,7 @@ public:
     void del_timer(util_timer *timer);
     void tick();
 
-pivate:
+private:
     void add_timer(util_timer *timer,util_timer *lst_head);
 
     util_timer *head;
@@ -71,6 +72,7 @@ public:
     void addfd(int epollfd, int fd, bool one_shot, int TRIGMode);
     void addsig(int sig, void(handler)(int), bool restart=true);
     void timer_handler();
+    void sig_handler(int sig);
     void show_error(int connfd, const char *info);
 
 public:
@@ -79,3 +81,6 @@ public:
     static int u_epollfd;
     int m_TIMESLOT;
 };
+
+void cb_func(client_data *user_data);
+#endif

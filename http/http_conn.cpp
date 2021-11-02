@@ -27,3 +27,5 @@ void http_conn::init_mysql_result(mysql_connection_pool* conn_pool){
     }
 
 }
+
+int http_conn::m_user_count = 0;

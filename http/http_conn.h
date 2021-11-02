@@ -6,9 +6,10 @@
 class http_conn{
 public:
     void init_mysql_result(mysql_connection_pool* conn_pool);
-
+    static int m_epollfd;
+    static int m_user_count;
 private:
-
+    
 
 };
 

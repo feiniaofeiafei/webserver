@@ -3,6 +3,7 @@
 #include "./config/config.h"
 #include <iostream>
 #include "./log/log.h"
+#include "./timer/lst_timer.h"
 
 using namespace std;
 
@@ -14,6 +15,10 @@ int main(int argc, char *argv[]){
     config.parse_arg(argc, argv);
     
     cout << "hello, this is myserver ..." << endl;
+
+    util_timer* timer = new util_timer;
+    sort_timer_list* timer_list = new sort_timer_list;
+    timer_list->add_timer(timer);
 
     Log::get_instance()->init("./ServerLog", 0, 2000, 800000, 600);
     LOG_INFO("hello, this is log_info test%d",1);
