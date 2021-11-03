@@ -155,7 +155,7 @@ void Utils::sig_handler(int sig)
     send(u_pipefd[1], (char*)&msg, 1, 0);
     errno = save_errno;
 }
-//这里为什么写成void(handler)(int)，而不是void(*handler)(int)呢？
+//杩欓噷涓轰粈涔堝啓鎴恦oid(handler)(int)锛岃�屼笉鏄痸oid(*handler)(int)鍛紵
 void Utils::addsig(int sig, void(*handler)(int), bool restart){
     struct sigaction sa;
     memset(&sa, '\0', sizeof(sa));
