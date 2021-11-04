@@ -1,0 +1,4 @@
+2021-10-26 21:41:29.071750 [Info]: hello, this is log_info test1
+2021-10-26 21:41:29.071801 [Debug]: hello, this is log_debug test2
+2021-10-26 21:41:29.071808 [Warn]: hello, this is log_warn test3
+2021-10-26 21:41:29.071812 [Error]: hello, this is log_error test4

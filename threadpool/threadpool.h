@@ -109,20 +109,22 @@ void thread_pool<T>::run(){
             continue;
         }
         if(1 == m_actor_model){
-            // // 读
-            // if(0 == request -> m_state)}{
-            //     if(request -> read_once()){
+            // 读
+            if(0 == request -> m_state){
+                if(request -> read_once()){
+                    request -> improv = 1;
+                    connectionRAII mysqlcon(&request -> mysql, m_conn_pool);
+                    request -> process();
+                }else{
 
-            //     }else{
+                }
+            }// 写
+            else{
 
-            //     }
-            // }// 写
-            // else{
-
-            // }
+            }
         }else{
-            // connectionRAII mysqlcon(&request -> sql, m_conn_pool);
-            // request -> process();
+            connectionRAII mysqlcon(&request -> mysql, m_conn_pool);
+            request -> process();
         }
     }
 }
