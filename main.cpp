@@ -20,7 +20,7 @@ int main(int argc, char *argv[]){
     sort_timer_list* timer_list = new sort_timer_list;
     timer_list->add_timer(timer);
 
-    Log::get_instance()->init("./ServerLog", 0, 2000, 800000, 600);
+    Log::get_instance()->init("./ServerLog.log", 0, 2000, 800000, 600);
     LOG_INFO("hello, this is log_info test%d",1);
     LOG_DEBUG("hello, this is log_debug test%d",2);
     LOG_WARN("hello, this is log_warn test%d",3);

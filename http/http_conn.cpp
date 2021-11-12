@@ -8,9 +8,9 @@ void modfd(int epollfd, int fd, int env, int TRIGMode){
     epoll_event event;
     event.data.fd = fd;
     if(1 == TRIGMode){
-        
+        event.events = env | EPOLLET | EPOLLONESHOT | EPOLLRDHUP;
     }else{
-
+        event.events = env | EPOLLONESHOT | EPOLLRDHUP;
     }
     epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &event);
 }
@@ -71,6 +71,33 @@ bool http_conn::process_write(HTTP_CODE ret){
 }
 
 bool http_conn::read_once(){
+    if(m_read_idx >= READ_BUFFER_SIZE){
+        return false;
+    }
+    int bytes_read = 0;
+
+    if(0 == m_TRIGMode){
+        bytes_read = recv(m_sockfd, m_read_buf + m_read_idx, READ_BUFFER_SIZE - m_read_idx, 0);
+        m_read_idx += bytes_read;
+        if(bytes_read <= 0){
+            return false;
+        }
+        return true;
+    }else{
+        while(true){
+            bytes_read = recv(m_sockfd, m_read_buf + m_read_idx, READ_BUFFER_SIZE - m_read_idx, 0);
+            if(bytes_read == -1){
+                if(errno == EAGAIN || errno == EWOULDBLOCK){
+                    break;
+                }
+                return false;
+            }else if(bytes_read == 0){
+                return false;
+            }
+            m_read_idx += bytes_read;
+        }
+        return true;
+    }
     return true;
 }
 
