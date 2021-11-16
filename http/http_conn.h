@@ -3,7 +3,7 @@
 
 #include <sys/epoll.h>
 #include "./../mysql/sql_connection_pool.h"
-#include "./log/log.h"
+#include "./../log/log.h"
 #include <sys/unistd.h>
 #include <errno.h>
 #include <sys/socket.h>
@@ -51,12 +51,14 @@ public:
 public:
     bool read_once();
     
-
     bool process_write(HTTP_CODE ret);
 
 private:
     HTTP_CODE parse_request_line(char *text);
+    HTTP_CODE parse_headers(char* text);
+    HTTP_CODE parse_content(char* text);
     HTTP_CODE process_read();
+    HTTP_CODE do_request();
     LINE_STATUS parse_line();
     char* get_line(){return m_read_buf + m_start_line;}
 
