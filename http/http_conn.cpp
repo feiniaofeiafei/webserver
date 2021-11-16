@@ -63,12 +63,48 @@ void http_conn::process(){
 }
 
 http_conn::HTTP_CODE http_conn::process_read(){
+    LINE_STATUS line_status = LINE_OK;
+    HTTP_CODE ret = NO_REQUEST;
+
+    char* text = 0;
+    while((m_check_state == CHECK_STATE_CONTENT && line_status == LINE_OK) || ((line_status == parse_line()) == LINE_OK)){
+        text = get_line();
+        m_start_line = m_checked_idx;
+        LOG_INFO("the text content is %s", text);
+        switch(m_check_state){
+            case CHECK_STATE_REQUESTLINE: {
+                ret = parse_request_line(text);
+                if(ret == BAD_REQUEST){
+                    return ret;
+                }
+                break;
+            }
+            case CHECK_STATE_HEADER: {
+                break;
+            }
+            case CHECK_STATE_CONTENT: {
+                break;
+            }
+            default:
+                return INTERNAL_ERROR;
+        }
+    }
+
     return NO_REQUEST;
 }
 
 bool http_conn::process_write(HTTP_CODE ret){
     return true;
 }
+
+http_conn::LINE_STATUS http_conn::parse_line(){
+    return LINE_OK;
+}
+
+http_conn::HTTP_CODE http_conn::parse_request_line(char* text){
+    return BAD_REQUEST;
+}
+
 
 bool http_conn::read_once(){
     if(m_read_idx >= READ_BUFFER_SIZE){
